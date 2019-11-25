@@ -9,7 +9,7 @@ import keras
 import openml
 import openml_keras
 
-openml.config.apikey = '033cb8cc8143c53180b10eec84835b2e'
+openml.config.apikey = 'key'
 print(openml.extensions.extensions)
 ############################################################################
 # Define an input layer for the network. In this example we are using the
