@@ -1,2 +1,1 @@
-# openml-keras
-Keras extension for openml-python
+# Keras extension for openml python
