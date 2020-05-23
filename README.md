@@ -1,6 +1,6 @@
 # Keras extension for OpenML python
 
-Keras extension for openml-python API.
+Keras extension for [openml-python API](https://github.com/openml/openml-python).
 
 #### Installation Instructions:
 
