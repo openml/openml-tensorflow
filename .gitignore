@@ -1,2 +1,8 @@
 
 openml_keras/__pycache__/
+
+openml_keras.egg-info/
+
+.idea/
+
+dist/

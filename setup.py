@@ -16,6 +16,7 @@ with open(os.path.join("README.md")) as fid:
     README = fid.read()
 
 setuptools.setup(name="openml-keras",
+                 version='0.0.2',
                  author=" ",
                  author_email="",
                  maintainer="Prabhant Singh",
@@ -32,7 +33,7 @@ setuptools.setup(name="openml-keras",
                  # Make sure to remove stale files such as the egg-info before updating this:
                  # https://stackoverflow.com/a/26547314
                  packages=setuptools.find_packages(
-                     include=['keras_extension.*', 'keras_extension'],
+                     include=['openml_keras*', 'openml_keras'],
                      exclude=["*.tests", "*.tests.*", "tests.*", "tests"],
                  ),
                  package_data={'': ['*.txt', '*.md']},
