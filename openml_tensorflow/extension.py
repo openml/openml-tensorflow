@@ -11,7 +11,7 @@ from collections import OrderedDict  # noqa: F401
 from distutils.version import LooseVersion
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
-import keras
+import tensorflow
 import numpy as np
 import pandas as pd
 import scipy.sparse
@@ -44,8 +44,10 @@ SIMPLE_TYPES = tuple([bool, int, float, str] + SIMPLE_NUMPY_TYPES)
 
 LAYER_PATTERN = re.compile(r'layer\d+\_(.*)')
 
+tensorflow.executing_eagerly()
 
-class KerasExtension(Extension):
+
+class TFExtension(Extension):
     """Connect Keras to OpenML-Python."""
 
     ################################################################################################
@@ -65,11 +67,11 @@ class KerasExtension(Extension):
         -------
         bool
         """
-        return cls._is_keras_flow(flow)
+        return cls._is_tf_flow(flow)
 
     @classmethod
     def can_handle_model(cls, model: Any) -> bool:
-        """Check whether a model is an instance of ``keras.models.Model``.
+        """Check whether a model is an instance of ``tf.models.Model``.
 
         Parameters
         ----------
@@ -79,7 +81,7 @@ class KerasExtension(Extension):
         -------
         bool
         """
-        return isinstance(model, keras.models.Model)
+        return isinstance(model, tensorflow.keras.models.Model)
 
     ################################################################################################
     # Methods for flow serialization and de-serialization
@@ -101,9 +103,9 @@ class KerasExtension(Extension):
         -------
         mixed
         """
-        return self._deserialize_keras(flow, initialize_with_defaults=initialize_with_defaults)
+        return self._deserialize_tf(flow, initialize_with_defaults=initialize_with_defaults)
 
-    def _deserialize_keras(
+    def _deserialize_tf(
             self,
             o: Any,
             components: Optional[Dict] = None,
@@ -111,7 +113,7 @@ class KerasExtension(Extension):
             recursion_depth: int = 0,
     ) -> Any:
         """
-        Recursive function to deserialize a keras flow.
+        Recursive function to deserialize a tensorflow flow.
 
         This function delegates all work to the respective functions to deserialize special data
         structures etc.
@@ -158,13 +160,13 @@ class KerasExtension(Extension):
         if isinstance(o, dict):
             rval = dict(
                 (
-                    self._deserialize_keras(
+                    self._deserialize_tf(
                         o=key,
                         components=components,
                         initialize_with_defaults=initialize_with_defaults,
                         recursion_depth=depth_pp,
                     ),
-                    self._deserialize_keras(
+                    self._deserialize_tf(
                         o=value,
                         components=components,
                         initialize_with_defaults=initialize_with_defaults,
@@ -175,7 +177,7 @@ class KerasExtension(Extension):
             )
         elif isinstance(o, (list, tuple)):
             rval = [
-                self._deserialize_keras(
+                self._deserialize_tf(
                     o=element,
                     components=components,
                     initialize_with_defaults=initialize_with_defaults,
@@ -188,7 +190,7 @@ class KerasExtension(Extension):
         elif isinstance(o, (bool, int, float, str)) or o is None:
             rval = o
         elif isinstance(o, OpenMLFlow):
-            if not self._is_keras_flow(o):
+            if not self._is_tf_flow(o):
                 raise ValueError('Only Keras flows can be reinstantiated')
             rval = self._deserialize_model(
                 flow=o,
@@ -197,7 +199,7 @@ class KerasExtension(Extension):
             )
         else:
             raise TypeError(o)
-        logging.info('-%s flow_to_keras END   o=%s, rval=%s'
+        logging.info('-%s flow_to_tf END   o=%s, rval=%s'
                      % ('-' * recursion_depth, o, rval))
         return rval
 
@@ -213,16 +215,16 @@ class KerasExtension(Extension):
         OpenMLFlow
         """
         # Necessary to make pypy not complain about all the different possible return types
-        return self._serialize_keras(model)
+        return self._serialize_tf(model)
 
-    def _serialize_keras(self, o: Any, parent_model: Optional[Any] = None) -> Any:
+    def _serialize_tf(self, o: Any, parent_model: Optional[Any] = None) -> Any:
         rval = None  # type: Any
 
         if self.is_estimator(o):
             # is the main model or a submodel
             rval = self._serialize_model(o)
         elif isinstance(o, (list, tuple)):
-            rval = [self._serialize_keras(element, parent_model) for element in o]
+            rval = [self._serialize_tf(element, parent_model) for element in o]
             if isinstance(o, tuple):
                 rval = tuple(rval)
         elif isinstance(o, SIMPLE_TYPES) or o is None:
@@ -240,8 +242,8 @@ class KerasExtension(Extension):
                     raise TypeError('Can only use string as keys, you passed '
                                     'type %s for value %s.' %
                                     (type(key), str(key)))
-                key = self._serialize_keras(key, parent_model)
-                value = self._serialize_keras(value, parent_model)
+                key = self._serialize_tf(key, parent_model)
+                value = self._serialize_tf(value, parent_model)
                 rval[key] = value
             rval = rval
         else:
@@ -252,25 +254,25 @@ class KerasExtension(Extension):
     def get_version_information(self) -> List[str]:
         """List versions of libraries required by the flow.
 
-        Libraries listed are ``Python``, ``keras``, ``numpy`` and ``scipy``.
+        Libraries listed are ``Python``, ``tensorflow``, ``numpy`` and ``scipy``.
 
         Returns
         -------
         List
         """
 
-        import keras
+        import tensorflow
         import scipy
         import numpy
 
         major, minor, micro, _, _ = sys.version_info
         python_version = 'Python_{}.'.format(
             ".".join([str(major), str(minor), str(micro)]))
-        keras_version = 'Keras_{}.'.format(keras.__version__)
+        tensorflow_version = 'Keras_{}.'.format(tensorflow.__version__)
         numpy_version = 'NumPy_{}.'.format(numpy.__version__)
         scipy_version = 'SciPy_{}.'.format(scipy.__version__)
 
-        return [python_version, keras_version, numpy_version, scipy_version]
+        return [python_version, tensorflow_version, numpy_version, scipy_version]
 
     def create_setup_string(self, model: Any) -> str:
         """Create a string which can be used to reinstantiate the given model.
@@ -287,14 +289,14 @@ class KerasExtension(Extension):
         return run_environment + " " + str(model)
 
     @classmethod
-    def _is_keras_flow(cls, flow: OpenMLFlow) -> bool:
-        return (flow.external_version.startswith('keras==')
-                or ',keras==' in flow.external_version)
+    def _is_tf_flow(cls, flow: OpenMLFlow) -> bool:
+        return (flow.external_version.startswith('tensorflow==')
+                or ',tensorflow==' in flow.external_version)
 
     def _serialize_model(self, model: Any) -> OpenMLFlow:
         """Create an OpenMLFlow.
 
-        Calls `keras_to_flow` recursively to properly serialize the
+        Calls `tf_to_flow` recursively to properly serialize the
         parameters to strings and the components (other models) to OpenMLFlows.
 
         Parameters
@@ -325,25 +327,25 @@ class KerasExtension(Extension):
 
         dependencies = '\n'.join([
             self._format_external_version(
-                'keras',
-                keras.__version__,
+                'tensorflow',
+                tensorflow.__version__,
             ),
             'numpy>=1.6.1',
             'scipy>=0.9',
         ])
 
-        keras_version = self._format_external_version('keras', keras.__version__)
-        keras_version_formatted = keras_version.replace('==', '_')
+        tensorflow_version = self._format_external_version('tensorflow', tensorflow.__version__)
+        tensorflow_version_formatted = tensorflow_version.replace('==', '_')
         flow = OpenMLFlow(name=name,
                           class_name=class_name,
-                          description='Automatically created keras flow.',
+                          description='Automatically created tensorflow flow.',
                           model=model,
                           components=subcomponents,
                           parameters=parameters,
                           parameters_meta_info=parameters_meta_info,
                           external_version=external_version,
-                          tags=['openml-python', 'keras',
-                                'python', keras_version_formatted,
+                          tags=['openml-python', 'tensorflow',
+                                'python', tensorflow_version_formatted,
 
                                 ],
                           language='English',
@@ -378,7 +380,7 @@ class KerasExtension(Extension):
         return ','.join(list(sorted(external_versions)))
 
     def _from_parameters(self, parameters: 'OrderedDict[str, Any]') -> Any:
-        """ Get a Keras model from flow parameters """
+        """ Get a tensorflow model from flow parameters """
 
         # Create a dict and recursively fill it with model components
         # First do this for non-layer items, then layer items.
@@ -388,24 +390,24 @@ class KerasExtension(Extension):
         # as long as they are not layers, since they need to be deserialized separately
         for k, v in parameters.items():
             if not LAYER_PATTERN.match(k):
-                config[k] = self._deserialize_keras(v)
+                config[k] = self._deserialize_tf(v)
 
         # Recreate the layers list and start to deserialize them back to the correct location
         config['config']['layers'] = []
         for k, v in parameters.items():
             if LAYER_PATTERN.match(k):
-                v = self._deserialize_keras(v)
+                v = self._deserialize_tf(v)
                 config['config']['layers'].append(v)
 
         # Deserialize the model from the configuration dictionary
-        model = keras.layers.deserialize(config)
+        model = tensorflow.keras.layers.deserialize(config)
 
         # Attempt to recompile the model if compilation parameters were present
         # during serialization
         if 'optimizer' in parameters:
-            training_config = self._deserialize_keras(parameters['optimizer'])
+            training_config = self._deserialize_tf(parameters['optimizer'])
             optimizer_config = training_config['optimizer_config']
-            optimizer = keras.optimizers.deserialize(optimizer_config)
+            optimizer = tensorflow.keras.optimizers.deserialize(optimizer_config)
 
             # Recover loss functions and metrics
             loss = training_config['loss']
@@ -435,8 +437,8 @@ class KerasExtension(Extension):
         model_config = {
             'class_name': model.__class__.__name__,
             'config': model.get_config(),
-            'keras_version': keras.__version__,
-            'backend': keras.backend.backend()
+            'tensorflow_version': tensorflow.__version__,
+            'backend': tensorflow.keras.backend.backend()
         }
 
         # Remove the layers from the configuration in order to allow them to be
@@ -446,7 +448,7 @@ class KerasExtension(Extension):
 
         # Add the rest of the model configuration entries to the parameter list
         for k, v in model_config.items():
-            parameters[k] = self._serialize_keras(v, model)
+            parameters[k] = self._serialize_tf(v, model)
 
         # Compute the format of the layer numbering. This pads the layer numbers with 0s in
         # order to ensure that the layers are printed in a human-friendly order, instead of
@@ -458,20 +460,20 @@ class KerasExtension(Extension):
         for i, v in enumerate(layers):
             layer = v['config']
             k = 'layer' + len_format.format(i) + "_" + layer['name']
-            parameters[k] = self._serialize_keras(v, model)
+            parameters[k] = self._serialize_tf(v, model)
 
         # Introduce the optimizer settings as hyper-parameters, if the model has been compiled
         if model.optimizer:
-            parameters['optimizer'] = self._serialize_keras({
+            parameters['optimizer'] = self._serialize_tf({
                 'optimizer_config': {
                     'class_name': model.optimizer.__class__.__name__,
                     'config': model.optimizer.get_config()
                 },
                 'loss': model.loss,
                 'metrics': model.metrics,
-                'weighted_metrics': model.weighted_metrics,
-                'sample_weight_mode': model.sample_weight_mode,
-                'loss_weights': model.loss_weights,
+                'weighted_metrics': model.metrics,
+                # 'sample_weight_mode': model.sample_weight_mode,
+                # 'loss_weights': model.loss_weights,
             }, model)
 
         return parameters
@@ -494,7 +496,7 @@ class KerasExtension(Extension):
 
         model_parameters = self._get_parameters(model)
         for k, v in sorted(model_parameters.items(), key=lambda t: t[0]):
-            rval = self._serialize_keras(v, model)
+            rval = self._serialize_tf(v, model)
             rval = json.dumps(rval)
 
             parameters[k] = rval
@@ -526,7 +528,7 @@ class KerasExtension(Extension):
             value = parameters.get(name)
             logging.info('--%s flow_parameter=%s, value=%s' %
                          ('-' * recursion_depth, name, value))
-            rval = self._deserialize_keras(
+            rval = self._deserialize_tf(
                 value,
                 components=components_,
                 initialize_with_defaults=keep_defaults,
@@ -542,7 +544,7 @@ class KerasExtension(Extension):
             value = components[name]
             logging.info('--%s flow_component=%s, value=%s'
                          % ('-' * recursion_depth, name, value))
-            rval = self._deserialize_keras(
+            rval = self._deserialize_tf(
                 value,
                 recursion_depth=recursion_depth + 1,
             )
@@ -631,7 +633,7 @@ class KerasExtension(Extension):
         -------
         bool
         """
-        return isinstance(model, keras.models.Model)
+        return isinstance(model, tensorflow.keras.models.Model)
 
     def seed_model(self, model: Any, seed: Optional[int] = None) -> Any:
         """
@@ -748,7 +750,10 @@ class KerasExtension(Extension):
         # This might look like a hack, and it is, but it maintains the compilation status,
         # in contrast to clone_model, and also is faster than using get_config + load_from_config
         # since it avoids string parsing
-        model_copy = pickle.loads(pickle.dumps(model))
+        import dill
+        import weakref
+        model_copy = dill.loads(dill.dumps(model))
+        #model_copy = pickle.loads(pickle.dumps(model))
 
         user_defined_measures = OrderedDict()  # type: 'OrderedDict[str, float]'
 
@@ -760,16 +765,16 @@ class KerasExtension(Extension):
             raise PyOpenMLError(str(e))
 
         if isinstance(task, OpenMLClassificationTask):
-            model_classes = keras.backend.argmax(y_train, axis=-1)
+            model_classes = tensorflow.keras.backend.argmax(y_train, axis=-1)
 
         # In supervised learning this returns the predictions for Y
         if isinstance(task, OpenMLSupervisedTask):
             pred_y = model_copy.predict(X_test)
             if isinstance(task, OpenMLClassificationTask):
-                pred_y = keras.backend.argmax(pred_y)
+                pred_y = tensorflow.keras.backend.argmax(pred_y)
             elif isinstance(task, OpenMLRegressionTask):
-                pred_y = keras.backend.reshape(pred_y, (-1,))
-            pred_y = keras.backend.eval(pred_y)
+                pred_y = tensorflow.keras.backend.reshape(pred_y, (-1,))
+            pred_y = tensorflow.keras.backend.eval(pred_y)
         else:
             raise ValueError(task)
 
