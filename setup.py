@@ -41,7 +41,7 @@ setuptools.setup(name="openml-keras",
                  install_requires=[
                      'openml',
                      'keras==2.2.4',
-                     'tensorflow==1.13.2'
+                     'tensorflow==1.15.2'
                  ],
                  classifiers=['Intended Audience :: Science/Research',
                               'Intended Audience :: Developers',
