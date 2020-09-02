@@ -5,11 +5,11 @@ Keras functional classification model example
 An example of a functional (non-sequential) network used as an OpenML flow.
 """
 
-import keras
+import tensorflow.keras as keras
 import openml
 import openml_keras
 
-openml.config.apikey = 'key'
+openml.config.apikey = '033cb8cc8143c53180b10eec84835b2e'
 print(openml.extensions.extensions)
 ############################################################################
 # Define an input layer for the network. In this example we are using the
