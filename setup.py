@@ -15,33 +15,32 @@ if sys.version_info < (3, 5):
 with open(os.path.join("README.md")) as fid:
     README = fid.read()
 
-setuptools.setup(name="openml-keras",
-                 version='0.0.2',
-                 author=" ",
+setuptools.setup(name="openml-tensorflow",
+                 version='0.0.1',
+                 author="Prabhant Singh",
                  author_email="",
                  maintainer="Prabhant Singh",
                  maintainer_email="prabhantsingh@gmail.com",
-                 description="Keras extension for Openml python API",
+                 description="Tensorflow extension for Openml python API",
                  long_description=README,
                  long_description_content_type='text/markdown',
                  license="BSD 3-clause",
                  url="http://openml.org/",
                  project_urls={
-                     "Documentation": "https://openml.github.io/openml-keras/",
-                     "Source Code": "https://github.com/openml/openml-keras"
+                     "Documentation": "https://openml.github.io/openml-tensorflow/",
+                     "Source Code": "https://github.com/openml/openml-tensorflow"
                  },
                  # Make sure to remove stale files such as the egg-info before updating this:
                  # https://stackoverflow.com/a/26547314
                  packages=setuptools.find_packages(
-                     include=['openml_keras*', 'openml_keras'],
+                     include=['openml_tensorflow*', 'openml_tensorflow'],
                      exclude=["*.tests", "*.tests.*", "tests.*", "tests"],
                  ),
                  package_data={'': ['*.txt', '*.md']},
                  python_requires=">=3.5",
                  install_requires=[
                      'openml',
-                     'keras==2.2.4',
-                     'tensorflow==1.13.2'
+                     'tensorflow'
                  ],
                  classifiers=['Intended Audience :: Science/Research',
                               'Intended Audience :: Developers',
