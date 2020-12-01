@@ -10,7 +10,7 @@ import zlib
 from collections import OrderedDict  # noqa: F401
 from distutils.version import LooseVersion
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
+from . import config
 import tensorflow
 import numpy as np
 import pandas as pd
@@ -759,7 +759,7 @@ class TFExtension(Extension):
 
         try:
             if isinstance(task, OpenMLSupervisedTask):
-                model_copy.fit(X_train, y_train)
+                model_copy.fit(X_train, y_train, epoch=config.epoch, batch_size=config.batch_size)
         except AttributeError as e:
             # typically happens when training a regressor on classification task
             raise PyOpenMLError(str(e))
