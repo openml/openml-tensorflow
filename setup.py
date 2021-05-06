@@ -16,9 +16,9 @@ with open(os.path.join("README.md")) as fid:
     README = fid.read()
 
 setuptools.setup(name="openml-tensorflow",
-                 version='0.0.1',
+                 version='0.0.2',
                  author="Prabhant Singh",
-                 author_email="",
+                 author_email="prabhantsingh@gmail.com",
                  maintainer="Prabhant Singh",
                  maintainer_email="prabhantsingh@gmail.com",
                  description="Tensorflow extension for Openml python API",
@@ -40,7 +40,7 @@ setuptools.setup(name="openml-tensorflow",
                  python_requires=">=3.5",
                  install_requires=[
                      'openml',
-                     'tensorflow'
+                     'tensorflow>=2.0'
                  ],
                  classifiers=['Intended Audience :: Science/Research',
                               'Intended Audience :: Developers',

@@ -10,11 +10,12 @@ import zlib
 from collections import OrderedDict  # noqa: F401
 from distutils.version import LooseVersion
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
-from . import config
 import tensorflow
 import numpy as np
 import pandas as pd
 import scipy.sparse
+from . import config
+
 
 import openml
 from openml.exceptions import PyOpenMLError
@@ -47,7 +48,7 @@ LAYER_PATTERN = re.compile(r'layer\d+\_(.*)')
 tensorflow.executing_eagerly()
 
 
-class TFExtension(Extension):
+class TensorflowExtension(Extension):
     """Connect Keras to OpenML-Python."""
 
     ################################################################################################
@@ -759,7 +760,9 @@ class TFExtension(Extension):
 
         try:
             if isinstance(task, OpenMLSupervisedTask):
-                model_copy.fit(X_train, y_train, epoch=config.epoch, batch_size=config.batch_size)
+                epoch = config.epoch
+                batch_size = config.batch_size
+                model_copy.fit(X_train, y_train, batch_size=config.batch_size,epochs=epoch)
         except AttributeError as e:
             # typically happens when training a regressor on classification task
             raise PyOpenMLError(str(e))
@@ -983,5 +986,13 @@ class TFExtension(Extension):
         """
 
         return model
-
+    def check_if_model_fitted(self, model: Any) -> bool:
+        """Returns True/False denoting if the model has already been fitted/trained
+        Parameters
+        ----------
+        model : Any
+        Returns
+        -------
+        bool
+        """
 

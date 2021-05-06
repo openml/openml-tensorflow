@@ -1,8 +1,8 @@
 
 import os
-from .extension import TFExtension
+from .extension import TensorflowExtension
 from openml.extensions import register_extension
+from . import config
+__all__ = ['TensorflowExtension', 'config']
 
-__all__ = ['TFExtension']
-
-register_extension(TFExtension)
+register_extension(TensorflowExtension)
