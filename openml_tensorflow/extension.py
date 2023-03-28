@@ -68,8 +68,6 @@ class TensorflowExtension(Extension):
         -------
         bool
         """
-        print(cls)
-        print(flow)
         return cls._is_tf_flow(flow)
 
     @classmethod
@@ -156,7 +154,6 @@ class TensorflowExtension(Extension):
         if isinstance(o, str):
             try:
                 o = json.loads(o)
-                print(o)
                 o = o[0:1000]
             except JSONDecodeError:
                 pass
@@ -194,7 +191,6 @@ class TensorflowExtension(Extension):
                 rval = tuple(rval)
         elif isinstance(o, (bool, int, float, str)) or o is None:
             rval = o[0:100]
-            print(rval)
         elif isinstance(o, OpenMLFlow):
             if not self._is_tf_flow(o):
                 raise ValueError('Only Keras flows can be reinstantiated')
@@ -253,10 +249,7 @@ class TensorflowExtension(Extension):
                 rval[key] = value
             rval = rval
             if len(rval.keys()) > 15:
-               print(rval)
                rval = rval[list(rval.keys())[0]]
-#        if 'keras.metrics.base_metric.Mean' in str(type(o)):
-#           rval['name'] = o.name
         else:
             #breakpoint()
             if type(o) == np.ndarray:
@@ -267,7 +260,6 @@ class TensorflowExtension(Extension):
                 else:
                    breakpoint()
                    raise TypeError(o, type(o))
-        #print(rval)
         return rval
     def get_version_information(self) -> List[str]:
         """List versions of libraries required by the flow.
@@ -782,8 +774,8 @@ class TensorflowExtension(Extension):
 
         datagen = config.datagen
 
-        train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory='../../.cache/openml/org/openml/www/datasets/45049/MD_MIX_Mini/images/',
-                                            x_col="FILE_NAME", y_col="encoded_labels",
+        train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
+                                            x_col=config.x_col, y_col=config.y_col,
                                             class_mode="categorical",
                                             target_size=(128,128),
                                             batch_size=32)
@@ -796,7 +788,6 @@ class TensorflowExtension(Extension):
                 epochs=config.epoch)
                 print('model_trained')
 
-#                model_copy.fit(X_train, y_train, batch_size=config.batch_size,epochs=epoch)
         except AttributeError as e:
             # typically happens when training a regressor on classification task
             raise PyOpenMLError(str(e))
@@ -806,9 +797,9 @@ class TensorflowExtension(Extension):
 
         # In supervised learning this returns the predictions for Y
         test_generator = datagen.flow_from_dataframe(dataframe=X_test, 
-                                             directory='../../.cache/openml/org/openml/www/datasets/45049/MD_MIX_Mini/images/',
+                                             directory=config.dir,
                                              class_mode=None,
-                                             x_col="FILE_NAME",
+                                             x_col=config.x_col,
                                              batch_size=1,
                                              shuffle=False,
                                              target_size=(128, 128))
@@ -816,8 +807,6 @@ class TensorflowExtension(Extension):
         if isinstance(task, OpenMLSupervisedTask):
             pred_y = model_copy.predict(test_generator)
             proba_y = pred_y
-#            breakpoint()
-#            pred_y = le.inverse_transform(pred_y)
             if isinstance(task, OpenMLClassificationTask):
                 pred_y = tensorflow.keras.backend.argmax(pred_y)
             elif isinstance(task, OpenMLRegressionTask):
