@@ -793,7 +793,7 @@ class TensorflowExtension(Extension):
             raise PyOpenMLError(str(e))
 
         if isinstance(task, OpenMLClassificationTask):
-            model_classes = tensorflow.keras.backend.argmax(y_train, axis=-1)
+            model_classes = tensorflow.keras.backend.argmax(X_train[‘encoded _labels’].astype(‘int’), axis=-1)
 
         # In supervised learning this returns the predictions for Y
         test_generator = datagen.flow_from_dataframe(dataframe=X_test, 
