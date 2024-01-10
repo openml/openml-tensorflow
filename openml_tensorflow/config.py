@@ -5,3 +5,5 @@ batch_size = 32
 datagen= None
 step_per_epoch = 100
 target_size = (128,128)
+xcol  = None
+ycol = None
