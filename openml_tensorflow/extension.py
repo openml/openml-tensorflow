@@ -777,8 +777,8 @@ class TensorflowExtension(Extension):
         train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
                                             x_col=config.x_col, y_col=config.y_col,
                                             class_mode="categorical",
-                                            target_size=(128,128),
-                                            batch_size=32)
+                                            target_size=config.target_size,
+                                            batch_size=config.batch_size)
         try:
             if isinstance(task, OpenMLSupervisedTask):
                 print("starting training")
@@ -802,7 +802,7 @@ class TensorflowExtension(Extension):
                                              x_col=config.x_col,
                                              batch_size=1,
                                              shuffle=False,
-                                             target_size=(128, 128))
+                                             config.target_size)
         print(f"length of test data is {len(X_test)}")
         if isinstance(task, OpenMLSupervisedTask):
             pred_y = model_copy.predict(test_generator)
