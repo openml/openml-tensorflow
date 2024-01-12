@@ -251,14 +251,12 @@ class TensorflowExtension(Extension):
             if len(rval.keys()) > 15:
                rval = rval[list(rval.keys())[0]]
         else:
-            #breakpoint()
             if type(o) == np.ndarray:
                 rval=o.item()
             else:
-                if 'keras.metrics.base_metric.Mean' in str(type(o)):
+                if 'keras.src.metrics.base_metric.Mean' in str(type(o)):
                    rval = o._name
                 else:
-                   breakpoint()
                    raise TypeError(o, type(o))
         return rval
     def get_version_information(self) -> List[str]:
@@ -470,7 +468,6 @@ class TensorflowExtension(Extension):
         for i, v in enumerate(layers):
             layer = v['config']
             k = 'layer' + len_format.format(i) + "_" + layer['name']
-            #breakpoint()
             parameters[k] = self._serialize_tf(v, model)
 
         # Introduce the optimizer settings as hyper-parameters, if the model has been compiled
@@ -851,11 +848,8 @@ class TensorflowExtension(Extension):
             proba_y = None
         else:
             raise TypeError(type(task))
-#        breakpoint()
         pred_y = le.inverse_transform(pred_y)
         pred_y = pred_y.astype('str')
-#        breakpoint()
-  #      [str(pred_y[i]) for i in pred_y]
         return pred_y, proba_y, user_defined_measures, None
 
     def compile_additional_information(
