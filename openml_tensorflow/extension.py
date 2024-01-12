@@ -802,7 +802,7 @@ class TensorflowExtension(Extension):
                                              x_col=config.x_col,
                                              batch_size=1,
                                              shuffle=False,
-                                             config.target_size)
+                                             target_size=config.target_size)
         print(f"length of test data is {len(X_test)}")
         if isinstance(task, OpenMLSupervisedTask):
             pred_y = model_copy.predict(test_generator)
