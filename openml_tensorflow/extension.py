@@ -347,7 +347,8 @@ class TensorflowExtension(Extension):
         tensorflow_version_formatted = tensorflow_version.replace('==', '_')
         flow = OpenMLFlow(name=name,
                           class_name=class_name,
-                          description='Automatically created tensorflow flow.',
+                        # description='Automatically created tensorflow flow.',
+                          description=model.to_json(),
                           model=model,
                           components=subcomponents,
                           parameters=parameters,
