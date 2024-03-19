@@ -32,7 +32,7 @@ openml.config.logger.setLevel(logging.DEBUG)
 ############################################################################
 
 ############################################################################
-openml.config.apikey = 'd7f058387fb3c8ba41e1ae61ebd999a0'
+openml.config.apikey = 'KEY'
 
 ############################################################################
 
@@ -49,7 +49,7 @@ openml_tensorflow.config.x_col = "FILE_NAME"
 openml_tensorflow.config.y_col = 'encoded_labels'
 openml_tensorflow.config.datagen = datagen
 openml_tensorflow.config.batch_size = 32
-openml_tensorflow.config.class_mode = "categorical"
+openml_tensorflow.config.class_mode = "raw"
 
 data_augmentation = tf.keras.Sequential([
   layers.RandomFlip("horizontal_and_vertical"),
@@ -79,24 +79,14 @@ task = openml.tasks.get_task(361987)
 # Run the Keras model on the task (requires an API key).
 run = openml.runs.run_model_on_task(model, task, avoid_duplicate_runs=False)
 
-# Publish the experiment on OpenML (optional, requires an API key).
+# If you want to publish the run with the onnx file, 
+# then you must call openml_tensorflow.add_onnx_to_run() immediately before run.publish(). 
+# When you publish, onnx file of last trained model is uploaded. 
+# Careful to not call this function when another run_model_on_task is called in between, 
+# as during publish later, only the last trained model (from last run_model_on_task call) is uploaded.   
+run = openml_tensorflow.add_onnx_to_run(run)
+
 run.publish()
 
 print('URL for run: %s/run/%d' % (openml.config.server, run.run_id))
 
-############################################################################
-
-# Visualize model in netron
-import netron
-import tf2onnx
-
-# Convert the TensorFlow model to ONNX
-onnx_model, _ = tf2onnx.convert.from_keras(model, opset=13)
-
-# Save the ONNX model to a file
-onnx_file_path = "model.onnx"
-with open(onnx_file_path, "wb") as f:
-    f.write(onnx_model.SerializeToString())
-
-# Visualize the ONNX model using Netron
-netron.start(onnx_file_path, browse=False)

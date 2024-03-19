@@ -47,9 +47,12 @@ LAYER_PATTERN = re.compile(r'layer\d+\_(.*)')
 
 tensorflow.executing_eagerly()
 
+## Variable to support a hack to add ONNX to runs without modifying openml-python
+last_models = None
 
 class TensorflowExtension(Extension):
     """Connect Keras to OpenML-Python."""
+    
 
     ################################################################################################
     # General setup
@@ -347,8 +350,7 @@ class TensorflowExtension(Extension):
         tensorflow_version_formatted = tensorflow_version.replace('==', '_')
         flow = OpenMLFlow(name=name,
                           class_name=class_name,
-                        # description='Automatically created tensorflow flow.',
-                          description=model.to_json(),
+                          description='Automatically created tensorflow flow.',
                           model=model,
                           components=subcomponents,
                           parameters=parameters,
@@ -761,8 +763,8 @@ class TensorflowExtension(Extension):
         # since it avoids string parsing
         import dill
         import weakref
-#        model_copy = dill.loads(dill.dumps(model))
-        model_copy = model
+        model_copy = dill.loads(dill.dumps(model))
+        # model_copy = tensorflow.keras.models.clone_model(model, input_tensors=None, clone_function=None)
         #model_copy = pickle.loads(pickle.dumps(model))
         user_defined_measures = OrderedDict()  # type: 'OrderedDict[str, float]'
         from sklearn import preprocessing
@@ -781,7 +783,7 @@ class TensorflowExtension(Extension):
             if isinstance(task, OpenMLSupervisedTask):
                 print("starting training")
                 batch_size = config.batch_size
-                model.fit(train_generator,
+                model_copy.fit(train_generator,
                 steps_per_epoch=config.step_per_epoch,
                 epochs=config.epoch)
                 print('model_trained')
@@ -851,6 +853,10 @@ class TensorflowExtension(Extension):
             raise TypeError(type(task))
         pred_y = le.inverse_transform(pred_y)
         pred_y = pred_y.astype('str')
+        
+        global last_models
+        last_models = model_copy
+        
         return pred_y, proba_y, user_defined_measures, None
 
     def compile_additional_information(
