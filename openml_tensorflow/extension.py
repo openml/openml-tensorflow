@@ -29,6 +29,8 @@ from openml.tasks import (
     OpenMLRegressionTask,
 )
 
+import tf2onnx
+
 if sys.version_info >= (3, 5):
     from json.decoder import JSONDecodeError
 else:
@@ -854,8 +856,11 @@ class TensorflowExtension(Extension):
         pred_y = le.inverse_transform(pred_y)
         pred_y = pred_y.astype('str')
         
+        # Convert the TensorFlow model to ONNX
+        onnx_model, _ = tf2onnx.convert.from_keras(model_copy, opset=13)
+        onnx_ = onnx_model.SerializeToString()
         global last_models
-        last_models = model_copy
+        last_models = onnx_
         
         return pred_y, proba_y, user_defined_measures, None
 

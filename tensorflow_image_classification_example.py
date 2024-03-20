@@ -47,6 +47,9 @@ openml_tensorflow.config.datagen = datagen
 openml_tensorflow.config.dir = openml.config.get_cache_directory()+'/datasets/44312/PNU_Micro/images/'
 openml_tensorflow.config.x_col = "FILE_NAME"
 openml_tensorflow.config.y_col = 'encoded_labels'
+# openml_tensorflow.config.dir = openml.config.get_cache_directory()+'/datasets/45923/Images/'
+# openml_tensorflow.config.x_col = "Filename"
+# openml_tensorflow.config.y_col = 'Class_encoded'
 openml_tensorflow.config.datagen = datagen
 openml_tensorflow.config.batch_size = 32
 openml_tensorflow.config.class_mode = "raw"
@@ -75,6 +78,7 @@ model.compile(optimizer='adam',
 
 # Download the OpenML task for the Meta_Album_PNU_Micro dataset.
 task = openml.tasks.get_task(361987)
+# task = openml.tasks.get_task(362065)
 
 # Run the Keras model on the task (requires an API key).
 run = openml.runs.run_model_on_task(model, task, avoid_duplicate_runs=False)
@@ -89,4 +93,19 @@ run = openml_tensorflow.add_onnx_to_run(run)
 run.publish()
 
 print('URL for run: %s/run/%d' % (openml.config.server, run.run_id))
+
+############################################################################
+
+# Visualize model in netron
+
+from urllib.request import urlretrieve
+
+published_run = openml.runs.get_run(run.run_id)
+url = 'https://api.openml.org/data/download/{}/model.onnx'.format(published_run.output_files['onnx_model'])
+
+file_path, _ = urlretrieve(url, 'model.onnx')
+
+import netron
+# Visualize the ONNX model using Netron
+netron.start(file_path)
 
