@@ -793,9 +793,12 @@ class TensorflowExtension(Extension):
         except AttributeError as e:
             # typically happens when training a regressor on classification task
             raise PyOpenMLError(str(e))
-
+        
         if isinstance(task, OpenMLClassificationTask):
-            model_classes = tensorflow.keras.backend.argmax(X_train['encoded_labels'].astype('int'), axis=-1)
+            # model_classes = tensorflow.keras.backend.argmax(X_train['encoded_labels'].astype('int'), axis=-1)
+            # I think below is teh correct implementation, instead of above. Check to confirm
+            model_classes = np.sort(X_train['encoded_labels'].astype('int').unique())
+            
 
         # In supervised learning this returns the predictions for Y
         test_generator = datagen.flow_from_dataframe(dataframe=X_test, 
