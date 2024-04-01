@@ -41,7 +41,8 @@ setuptools.setup(name="openml-tensorflow",
                  install_requires=[
                      'openml',
                      'tensorflow>=2.0',
-                     'tf2onnx'
+                     'tf2onnx', 
+                     'dill'
                  ],
                  classifiers=['Intended Audience :: Science/Research',
                               'Intended Audience :: Developers',
