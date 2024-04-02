@@ -226,7 +226,6 @@ class TensorflowExtension(Extension):
 
     def _serialize_tf(self, o: Any, parent_model: Optional[Any] = None) -> Any:
         rval = None  # type: Any
-#        breakpoint()
         if self.is_estimator(o):
             # is the main model or a submodel
             rval = self._serialize_model(o)
@@ -261,6 +260,9 @@ class TensorflowExtension(Extension):
             else:
                 if 'keras.src.metrics.base_metric.Mean' in str(type(o)):
                    rval = o._name
+                #   This elif is only to make it compatibile with tensorflow version-2.10.0
+                elif 'keras.metrics.base_metric.Mean' in str(type(o)):
+                    rval = o._name
                 else:
                    raise TypeError(o, type(o))
         return rval
