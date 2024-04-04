@@ -755,7 +755,7 @@ class TensorflowExtension(Extension):
             for obs, prediction_idx in enumerate(y):
                 result[obs][prediction_idx] = 1.0
             return result
-
+        
         if isinstance(task, OpenMLSupervisedTask):
             if y_train is None:
                 raise TypeError('argument y_train must not be of type None')
@@ -783,13 +783,47 @@ class TensorflowExtension(Extension):
                                             class_mode="categorical",
                                             target_size=config.target_size,
                                             batch_size=config.batch_size)
+        
+                          
+        if config.perform_validation:
+                    
+            from sklearn.model_selection import train_test_split
+            from tensorflow.keras.preprocessing.image import ImageDataGenerator
+            
+            X_train, x_val = train_test_split(X_train, test_size=config.validation_split, shuffle=True, stratify=X_train[config.y_col], random_state=0)
+            
+            datagen_train = config.datagen
+            train_generator = datagen_train.flow_from_dataframe(dataframe=X_train, directory=config.dir,
+                                    x_col=config.x_col, y_col=config.y_col,
+                                    class_mode="categorical",
+                                    target_size=config.target_size,
+                                    batch_size=config.batch_size)
+            
+            datagen_valid = config.datagen_valid # Don't augment the validation data!
+            valid_generator = datagen_valid.flow_from_dataframe(dataframe=x_val,
+                                    directory=config.dir,
+                                    x_col=config.x_col, y_col=config.y_col,
+                                    class_mode="categorical",
+                                    target_size=config.target_size,
+                                    batch_size=config.batch_size)
+            
         try:
             if isinstance(task, OpenMLSupervisedTask):
                 print("starting training")
                 batch_size = config.batch_size
-                model_copy.fit(train_generator,
-                steps_per_epoch=config.step_per_epoch,
-                epochs=config.epoch)
+                
+                if config.perform_validation:
+                    model_copy.fit(train_generator,
+                    steps_per_epoch=config.step_per_epoch,
+                    validation_data = valid_generator, 
+                    validation_steps =  valid_generator.n//valid_generator.batch_size,
+                    epochs=config.epoch)
+                else:
+                    model_copy.fit(train_generator,
+                    steps_per_epoch=config.step_per_epoch,
+                    epochs=config.epoch)
+                    
+                
                 print('model_trained')
 
         except AttributeError as e:
@@ -798,7 +832,7 @@ class TensorflowExtension(Extension):
         
         if isinstance(task, OpenMLClassificationTask):
             # model_classes = tensorflow.keras.backend.argmax(X_train['encoded_labels'].astype('int'), axis=-1)
-            # I think below is teh correct implementation, instead of above. Check to confirm
+            # I think below is th correct implementation, instead of above. Check to confirm
             model_classes = np.sort(X_train['encoded_labels'].astype('int').unique())
             
 
@@ -858,6 +892,7 @@ class TensorflowExtension(Extension):
             proba_y = None
         else:
             raise TypeError(type(task))
+        
         pred_y = le.inverse_transform(pred_y)
         pred_y = pred_y.astype('str')
         
