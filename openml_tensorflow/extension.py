@@ -894,7 +894,7 @@ class TensorflowExtension(Extension):
             raise TypeError(type(task))
         
         
-        # Correct predictions
+        # Adjust prediction labels according to train_generator
         class_mapping = train_generator.class_indices      
         classes_ordered = sorted(class_mapping, key=class_mapping.get)
         pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
