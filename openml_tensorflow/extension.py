@@ -893,6 +893,12 @@ class TensorflowExtension(Extension):
         else:
             raise TypeError(type(task))
         
+        
+        # Correct predictions
+        class_mapping = train_generator.class_indices      
+        classes_ordered = sorted(class_mapping, key=class_mapping.get)
+        pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
+        
         pred_y = le.inverse_transform(pred_y)
         pred_y = pred_y.astype('str')
         
