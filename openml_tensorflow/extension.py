@@ -776,8 +776,9 @@ class TensorflowExtension(Extension):
         X_train['encoded_labels'] = le.fit(y_train).transform(y_train)
         X_train['encoded_labels'] = X_train['encoded_labels'].astype("string")
 
+        kwargs = config.kwargs if config.kwargs is not None else {}
+        
         datagen = config.datagen
-
         train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
                                             x_col=config.x_col, y_col=config.y_col,
                                             class_mode="categorical",
@@ -817,11 +818,14 @@ class TensorflowExtension(Extension):
                     steps_per_epoch=config.step_per_epoch,
                     validation_data = valid_generator, 
                     validation_steps =  valid_generator.n//valid_generator.batch_size,
-                    epochs=config.epoch)
+                    epochs=config.epoch,
+                    **kwargs)
+                    
                 else:
                     model_copy.fit(train_generator,
                     steps_per_epoch=config.step_per_epoch,
-                    epochs=config.epoch)
+                    epochs=config.epoch,
+                    **kwargs)
                     
                 
                 print('model_trained')
