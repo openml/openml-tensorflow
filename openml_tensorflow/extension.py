@@ -844,6 +844,7 @@ class TensorflowExtension(Extension):
                                              directory=config.dir,
                                              class_mode="categorical",
                                              x_col=config.x_col,
+                                             y_col=config.y_col,
                                              batch_size=1,
                                              shuffle=False,
                                              classes=classes_ordered,
