@@ -54,7 +54,6 @@ last_models = None
 
 class TensorflowExtension(Extension):
     """Connect Keras to OpenML-Python."""
-    
 
     ################################################################################################
     # General setup
@@ -791,10 +790,10 @@ class TensorflowExtension(Extension):
             from sklearn.model_selection import train_test_split
             from tensorflow.keras.preprocessing.image import ImageDataGenerator
             
-            X_train, x_val = train_test_split(X_train, test_size=config.validation_split, shuffle=True, stratify=X_train[config.y_col], random_state=0)
+            X_train_train, x_val = train_test_split(X_train, test_size=config.validation_split, shuffle=True, stratify=X_train[config.y_col], random_state=0)
             
             datagen_train = config.datagen
-            train_generator = datagen_train.flow_from_dataframe(dataframe=X_train, directory=config.dir,
+            train_generator = datagen_train.flow_from_dataframe(dataframe=X_train_train, directory=config.dir,
                                     x_col=config.x_col, y_col=config.y_col,
                                     class_mode="categorical",
                                     target_size=config.target_size,
@@ -811,7 +810,6 @@ class TensorflowExtension(Extension):
         try:
             if isinstance(task, OpenMLSupervisedTask):
                 print("starting training")
-                batch_size = config.batch_size
                 
                 if config.perform_validation:
                     model_copy.fit(train_generator,
@@ -839,7 +837,8 @@ class TensorflowExtension(Extension):
             # I think below is th correct implementation, instead of above. Check to confirm
             model_classes = np.sort(X_train['encoded_labels'].astype('int').unique())
             
-
+        class_mapping = train_generator.class_indices   
+        classes_ordered = sorted(class_mapping, key=class_mapping.get)
         # In supervised learning this returns the predictions for Y
         test_generator = datagen.flow_from_dataframe(dataframe=X_test, 
                                              directory=config.dir,
@@ -847,6 +846,7 @@ class TensorflowExtension(Extension):
                                              x_col=config.x_col,
                                              batch_size=1,
                                              shuffle=False,
+                                             classes=classes_ordered,
                                              target_size=config.target_size)
         print(f"length of test data is {len(X_test)}")
         if isinstance(task, OpenMLSupervisedTask):
@@ -899,9 +899,9 @@ class TensorflowExtension(Extension):
         
         
         # Adjust prediction labels according to train_generator
-        class_mapping = train_generator.class_indices      
-        classes_ordered = sorted(class_mapping, key=class_mapping.get)
-        pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
+        #class_mapping = train_generator.class_indices      
+        #classes_ordered = sorted(class_mapping, key=class_mapping.get)
+        #pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
         
         pred_y = le.inverse_transform(pred_y)
         pred_y = pred_y.astype('str')
