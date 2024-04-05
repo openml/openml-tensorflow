@@ -832,10 +832,10 @@ class TensorflowExtension(Extension):
             # typically happens when training a regressor on classification task
             raise PyOpenMLError(str(e))
         
-        #if isinstance(task, OpenMLClassificationTask):
+        if isinstance(task, OpenMLClassificationTask):
             # model_classes = tensorflow.keras.backend.argmax(X_train['encoded_labels'].astype('int'), axis=-1)
             # I think below is th correct implementation, instead of above. Check to confirm
-            #model_classes = np.sort(X_train['encoded_labels'].astype('int').unique())
+            model_classes = np.sort(X_train['encoded_labels'].astype('int').unique())
             
         class_mapping = train_generator.class_indices   
         classes_ordered = sorted(class_mapping, key=class_mapping.get)
@@ -882,7 +882,7 @@ class TensorflowExtension(Extension):
                     # (because the rest of the library expects that the probabilities are ordered
                     # the same way as the classes are ordered).
                     proba_y_new = np.zeros((proba_y.shape[0], len(task.class_labels)))
-                    for idx, model_class in enumerate(classes_ordered):
+                    for idx, model_class in enumerate(model_classes):
                         proba_y_new[:, model_class] = proba_y[:, idx]
                     proba_y = proba_y_new
 
@@ -897,7 +897,6 @@ class TensorflowExtension(Extension):
             proba_y = None
         else:
             raise TypeError(type(task))
-        
         
         # Adjust prediction labels according to train_generator
         pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
