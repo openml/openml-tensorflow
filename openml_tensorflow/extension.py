@@ -837,7 +837,7 @@ class TensorflowExtension(Extension):
             # I think below is th correct implementation, instead of above. Check to confirm
             model_classes = np.sort(X_train['encoded_labels'].astype('int').unique())
             
-        class_mapping = train_generator.class_indices   
+        class_mapping = train_generator.class_indices  
         classes_ordered = sorted(class_mapping, key=class_mapping.get)
         # In supervised learning this returns the predictions for Y
         test_generator = datagen.flow_from_dataframe(dataframe=X_test, 
@@ -899,7 +899,7 @@ class TensorflowExtension(Extension):
             raise TypeError(type(task))
         
         # Adjust prediction labels according to train_generator
-        pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
+        # pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
         pred_y = le.inverse_transform(pred_y)
         pred_y = pred_y.astype('str')
         
