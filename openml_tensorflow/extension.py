@@ -842,7 +842,7 @@ class TensorflowExtension(Extension):
         # In supervised learning this returns the predictions for Y
         test_generator = datagen.flow_from_dataframe(dataframe=X_test, 
                                              directory=config.dir,
-                                             class_mode=None,
+                                             class_mode="categorical",
                                              x_col=config.x_col,
                                              batch_size=1,
                                              shuffle=False,
