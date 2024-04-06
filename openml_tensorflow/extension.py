@@ -783,6 +783,7 @@ class TensorflowExtension(Extension):
         #print("classes", class_names)
 
         kwargs = config.kwargs if config.kwargs is not None else {}
+        from tensorflow.keras.preprocessing.image import ImageDataGenerator
         
         datagen = config.datagen
         train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
