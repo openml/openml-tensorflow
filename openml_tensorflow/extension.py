@@ -822,7 +822,7 @@ class TensorflowExtension(Extension):
             
         try:
             if isinstance(task, OpenMLSupervisedTask):
-                print(f"Testing ({len(X_train)} samples)")
+                print(f"Training ({len(X_train)} samples)")
 
                 
                 if config.perform_validation:
