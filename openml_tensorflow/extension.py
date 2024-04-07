@@ -323,7 +323,6 @@ class TensorflowExtension(Extension):
         OpenMLFlow
 
         """
-
         # Get all necessary information about the model objects itself
         parameters, parameters_meta_info, subcomponents, subcomponents_explicit = \
             self._extract_information_from_model(model)
@@ -469,11 +468,13 @@ class TensorflowExtension(Extension):
         # having weird orderings
         max_len = int(np.ceil(np.log10(len(layers))))
         len_format = '{0:0>' + str(max_len) + '}'
-
+        
         # Add the layers as hyper-parameters
         for i, v in enumerate(layers):
             layer = v['config']
-            k = 'layer' + len_format.format(i) + "_" + layer['name']
+            # Some models contain "/" in layer name to denote hirerachy, while some denote it using "_"
+            # To correct this all "/" in layer[name] is replaced by "_"
+            k = 'layer' + len_format.format(i) + "_" + layer['name'].replace('/', '_')
             parameters[k] = self._serialize_tf(v, model)
 
         # Introduce the optimizer settings as hyper-parameters, if the model has been compiled
