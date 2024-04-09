@@ -439,7 +439,7 @@ class TensorflowExtension(Extension):
                           'the model was *not* compiled. '
                           'Compile it manually.')
 
-        return model
+        return model 
 
     def _get_parameters(self, model: Any) -> 'OrderedDict[str, Optional[str]]':
         # Get the parameters from a model in an OrderedDict
@@ -453,10 +453,19 @@ class TensorflowExtension(Extension):
             'tensorflow_version': tensorflow.__version__,
             'backend': tensorflow.keras.backend.backend()
         }
-
+        layers = []
+        
+        # In some cases a layer can be a complete pretrained model (eg transfer learning). 
+        # Hence 'layer' list for such layers are flattened so that each layer of the pretrained model 
+        # is treated separately. this is to ensure OpenML server donot run into limit error while publishing the model. 
+        for i in range(len(model_config['config']['layers'])):
+            if 'layers' in model_config['config']['layers'][i]['config'].keys():
+                layers.extend(model_config['config']['layers'][i]['config']['layers'])
+            else:
+                layers.append(model_config['config']['layers'][i])    
+                
         # Remove the layers from the configuration in order to allow them to be
         # pretty printed as model parameters
-        layers = model_config['config']['layers']
         del model_config['config']['layers']
 
         # Add the rest of the model configuration entries to the parameter list
@@ -490,7 +499,7 @@ class TensorflowExtension(Extension):
                 # 'sample_weight_mode': model.sample_weight_mode,
                 # 'loss_weights': model.loss_weights,
             }, model)
-
+        
         return parameters
 
     def _extract_information_from_model(
