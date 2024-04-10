@@ -821,7 +821,7 @@ class TensorflowExtension(Extension):
                                             target_size=config.target_size,
                                             batch_size=config.batch_size)
         else:
-            
+            from tensorflow.keras.preprocessing.image import ImageDataGenerator
             datagen = config.datagen
             train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
                                             x_col=config.x_col, y_col='labels',
