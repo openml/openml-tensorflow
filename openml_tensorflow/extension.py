@@ -28,7 +28,7 @@ from openml.tasks import (
     OpenMLClassificationTask,
     OpenMLRegressionTask,
 )
-
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import tf2onnx
 
 if sys.version_info >= (3, 5):
@@ -793,15 +793,6 @@ class TensorflowExtension(Extension):
         #print("classes", class_names)
 
         kwargs = config.kwargs if config.kwargs is not None else {}
-        from tensorflow.keras.preprocessing.image import ImageDataGenerator
-        
-        datagen = config.datagen
-        train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
-                                            x_col=config.x_col, y_col='labels',
-                                            class_mode="categorical",
-                                            classes = class_names,
-                                            target_size=config.target_size,
-                                            batch_size=config.batch_size)
         
                           
         if config.perform_validation:
@@ -824,6 +815,15 @@ class TensorflowExtension(Extension):
             datagen_valid = config.datagen_valid
             valid_generator = datagen_valid.flow_from_dataframe(dataframe=x_val,
                                             directory=config.dir,
+                                            x_col=config.x_col, y_col='labels',
+                                            class_mode="categorical",
+                                            classes = class_names,
+                                            target_size=config.target_size,
+                                            batch_size=config.batch_size)
+        else:
+            
+            datagen = config.datagen
+            train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
                                             x_col=config.x_col, y_col='labels',
                                             class_mode="categorical",
                                             classes = class_names,
