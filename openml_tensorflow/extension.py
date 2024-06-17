@@ -144,7 +144,6 @@ class TensorflowExtension(Extension):
         -------
         mixed
         """
-
         logging.info('-%s flow_to_keras START o=%s, components=%s, '
                      'init_defaults=%s' % ('-' * recursion_depth, o, components,
                                            initialize_with_defaults))
@@ -154,11 +153,13 @@ class TensorflowExtension(Extension):
         # JSON strings are used to encoder parameter values. By passing around
         # json strings for parameters, we make sure that we can flow_to_keras
         # the parameter values to the correct type.
-
         if isinstance(o, str):
             try:
                 o = json.loads(o)
-                o = o[0:1000]
+                try:
+                    o = o[0:1000]
+                except:
+                    pass
             except JSONDecodeError:
                 pass
 
@@ -194,10 +195,13 @@ class TensorflowExtension(Extension):
             if isinstance(o, tuple):
                 rval = tuple(rval)
         elif isinstance(o, (bool, int, float, str)) or o is None:
-            rval = o[0:100]
+            try:
+                rval = o[0:100]
+            except:
+                rval = o
         elif isinstance(o, OpenMLFlow):
             if not self._is_tf_flow(o):
-                raise ValueError('Only Keras flows can be reinstantiated')
+                raise ValueError('Only Tensorflow flows can be reinstantiated')
             rval = self._deserialize_model(
                 flow=o,
                 keep_defaults=initialize_with_defaults,
@@ -251,8 +255,9 @@ class TensorflowExtension(Extension):
                 value = self._serialize_tf(value, parent_model)
                 rval[key] = value
             rval = rval
-            if len(rval.keys()) > 15:
-               rval = rval[list(rval.keys())[0]]
+            # Not sure below limit is used for reducing paramter size. 
+            # if len(rval.keys()) > 15:
+            #    rval = rval[list(rval.keys())[0]]
         else:
             if type(o) == np.ndarray:
                 rval=o.item()
