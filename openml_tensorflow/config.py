@@ -3,9 +3,9 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 epoch = 10
 batch_size = 32
-datagen= None
+datagen= ImageDataGenerator()
 step_per_epoch = 100
-target_size = (128,128)
+target_size = (128,128) 
 x_col  = None
 y_col = None # TODO: Remove? This is not used if a task is defined.
 
