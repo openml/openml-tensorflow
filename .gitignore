@@ -14,3 +14,9 @@ openml_tensorflow/__pycache__/
 openml_tensorflow.egg-info/
 
 tests/__pycache__/
+
+venv/
+
+build/
+
+create_tasks/
