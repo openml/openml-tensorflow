@@ -8,3 +8,9 @@ openml_keras.egg-info/
 dist/
 
 openml_tensorflow/__pycache__/
+
+.onnx
+
+openml_tensorflow.egg-info/
+
+tests/__pycache__/
