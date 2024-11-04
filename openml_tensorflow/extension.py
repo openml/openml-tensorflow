@@ -28,6 +28,8 @@ from openml.tasks import (
     OpenMLClassificationTask,
     OpenMLRegressionTask,
 )
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+import tf2onnx
 
 if sys.version_info >= (3, 5):
     from json.decoder import JSONDecodeError
@@ -47,6 +49,8 @@ LAYER_PATTERN = re.compile(r'layer\d+\_(.*)')
 
 tensorflow.executing_eagerly()
 
+## Variable to support a hack to add ONNX to runs without modifying openml-python
+last_models = None
 
 class TensorflowExtension(Extension):
     """Connect Keras to OpenML-Python."""
@@ -140,7 +144,6 @@ class TensorflowExtension(Extension):
         -------
         mixed
         """
-
         logging.info('-%s flow_to_keras START o=%s, components=%s, '
                      'init_defaults=%s' % ('-' * recursion_depth, o, components,
                                            initialize_with_defaults))
@@ -150,10 +153,13 @@ class TensorflowExtension(Extension):
         # JSON strings are used to encoder parameter values. By passing around
         # json strings for parameters, we make sure that we can flow_to_keras
         # the parameter values to the correct type.
-
         if isinstance(o, str):
             try:
                 o = json.loads(o)
+                try:
+                    o = o[0:1000]
+                except:
+                    pass
             except JSONDecodeError:
                 pass
 
@@ -189,10 +195,13 @@ class TensorflowExtension(Extension):
             if isinstance(o, tuple):
                 rval = tuple(rval)
         elif isinstance(o, (bool, int, float, str)) or o is None:
-            rval = o
+            try:
+                rval = o[0:100]
+            except:
+                rval = o
         elif isinstance(o, OpenMLFlow):
             if not self._is_tf_flow(o):
-                raise ValueError('Only Keras flows can be reinstantiated')
+                raise ValueError('Only Tensorflow flows can be reinstantiated')
             rval = self._deserialize_model(
                 flow=o,
                 keep_defaults=initialize_with_defaults,
@@ -220,7 +229,6 @@ class TensorflowExtension(Extension):
 
     def _serialize_tf(self, o: Any, parent_model: Optional[Any] = None) -> Any:
         rval = None  # type: Any
-
         if self.is_estimator(o):
             # is the main model or a submodel
             rval = self._serialize_model(o)
@@ -247,11 +255,21 @@ class TensorflowExtension(Extension):
                 value = self._serialize_tf(value, parent_model)
                 rval[key] = value
             rval = rval
+            # Not sure below limit is used for reducing paramter size. 
+            # if len(rval.keys()) > 15:
+            #    rval = rval[list(rval.keys())[0]]
         else:
-            raise TypeError(o, type(o))
-
+            if type(o) == np.ndarray:
+                rval=o.item()
+            else:
+                if 'keras.src.metrics.base_metric.Mean' in str(type(o)):
+                   rval = o._name
+                #   This elif is only to make it compatibile with tensorflow version-2.10.0
+                elif 'keras.metrics.base_metric.Mean' in str(type(o)):
+                    rval = o._name
+                else:
+                   raise TypeError(o, type(o))
         return rval
-
     def get_version_information(self) -> List[str]:
         """List versions of libraries required by the flow.
 
@@ -269,7 +287,7 @@ class TensorflowExtension(Extension):
         major, minor, micro, _, _ = sys.version_info
         python_version = 'Python_{}.'.format(
             ".".join([str(major), str(minor), str(micro)]))
-        tensorflow_version = 'Keras_{}.'.format(tensorflow.__version__)
+        tensorflow_version = 'tensorflow_{}.'.format(tensorflow.__version__)
         numpy_version = 'NumPy_{}.'.format(numpy.__version__)
         scipy_version = 'SciPy_{}.'.format(scipy.__version__)
 
@@ -291,7 +309,8 @@ class TensorflowExtension(Extension):
 
     @classmethod
     def _is_tf_flow(cls, flow: OpenMLFlow) -> bool:
-        return (flow.external_version.startswith('tensorflow==')
+#        breakpoint()
+        return (flow.external_version.startswith('keras==')
                 or ',tensorflow==' in flow.external_version)
 
     def _serialize_model(self, model: Any) -> OpenMLFlow:
@@ -309,7 +328,6 @@ class TensorflowExtension(Extension):
         OpenMLFlow
 
         """
-
         # Get all necessary information about the model objects itself
         parameters, parameters_meta_info, subcomponents, subcomponents_explicit = \
             self._extract_information_from_model(model)
@@ -317,7 +335,7 @@ class TensorflowExtension(Extension):
         # Create a flow name, which contains a hash of the parameters as part of the name
         # This is done in order to ensure that we are not exceeding the 1024 character limit
         # of the API, since NNs can become quite large
-        class_name = model.__module__ + "." + model.__class__.__name__
+        class_name = "tensorflow." + model.__module__ + "." + model.__class__.__name__
         class_name += '.' + format(
             zlib.crc32(json.dumps(parameters, sort_keys=True).encode('utf8')),
             'x'
@@ -351,7 +369,6 @@ class TensorflowExtension(Extension):
                                 ],
                           language='English',
                           dependencies=dependencies)
-
         return flow
 
     def _get_external_version_string(
@@ -427,7 +444,7 @@ class TensorflowExtension(Extension):
                           'the model was *not* compiled. '
                           'Compile it manually.')
 
-        return model
+        return model 
 
     def _get_parameters(self, model: Any) -> 'OrderedDict[str, Optional[str]]':
         # Get the parameters from a model in an OrderedDict
@@ -441,10 +458,19 @@ class TensorflowExtension(Extension):
             'tensorflow_version': tensorflow.__version__,
             'backend': tensorflow.keras.backend.backend()
         }
-
+        layers = []
+        
+        # In some cases a layer can be a complete pretrained model (eg transfer learning). 
+        # Hence 'layer' list for such layers are flattened so that each layer of the pretrained model 
+        # is treated separately. this is to ensure OpenML server donot run into limit error while publishing the model. 
+        for i in range(len(model_config['config']['layers'])):
+            if 'layers' in model_config['config']['layers'][i]['config'].keys():
+                layers.extend(model_config['config']['layers'][i]['config']['layers'])
+            else:
+                layers.append(model_config['config']['layers'][i])    
+                
         # Remove the layers from the configuration in order to allow them to be
         # pretty printed as model parameters
-        layers = model_config['config']['layers']
         del model_config['config']['layers']
 
         # Add the rest of the model configuration entries to the parameter list
@@ -456,11 +482,13 @@ class TensorflowExtension(Extension):
         # having weird orderings
         max_len = int(np.ceil(np.log10(len(layers))))
         len_format = '{0:0>' + str(max_len) + '}'
-
+        
         # Add the layers as hyper-parameters
         for i, v in enumerate(layers):
             layer = v['config']
-            k = 'layer' + len_format.format(i) + "_" + layer['name']
+            # Some models contain "/" in layer name to denote hirerachy, while some denote it using "_"
+            # To correct this all "/" in layer[name] is replaced by "_"
+            k = 'layer' + len_format.format(i) + "_" + layer['name'].replace('/', '_')
             parameters[k] = self._serialize_tf(v, model)
 
         # Introduce the optimizer settings as hyper-parameters, if the model has been compiled
@@ -472,11 +500,11 @@ class TensorflowExtension(Extension):
                 },
                 'loss': model.loss,
                 'metrics': model.metrics,
-                'weighted_metrics': model.metrics,
+                # 'weighted_metrics': model.metrics,
                 # 'sample_weight_mode': model.sample_weight_mode,
                 # 'loss_weights': model.loss_weights,
             }, model)
-
+        
         return parameters
 
     def _extract_information_from_model(
@@ -741,7 +769,7 @@ class TensorflowExtension(Extension):
             for obs, prediction_idx in enumerate(y):
                 result[obs][prediction_idx] = 1.0
             return result
-
+        
         if isinstance(task, OpenMLSupervisedTask):
             if y_train is None:
                 raise TypeError('argument y_train must not be of type None')
@@ -754,53 +782,125 @@ class TensorflowExtension(Extension):
         import dill
         import weakref
         model_copy = dill.loads(dill.dumps(model))
+        # model_copy = tensorflow.keras.models.clone_model(model, input_tensors=None, clone_function=None)
         #model_copy = pickle.loads(pickle.dumps(model))
-
         user_defined_measures = OrderedDict()  # type: 'OrderedDict[str, float]'
 
+        #from sklearn import preprocessing
+        #le = preprocessing.LabelEncoder()
+        #print("y_train",y_train)
+        #X_train['encoded_labels'] = le.fit(y_train).transform(y_train)
+        #X_train['encoded_labels'] = X_train['encoded_labels'].astype("string")
+
+        X_train['labels'] = y_train
+        #print("labels",X_train['labels'])
+        class_names = sorted(y_train.unique())
+        #print("classes", class_names)
+
+        kwargs = config.kwargs if config.kwargs is not None else {}
+        
+                          
+        if config.perform_validation:
+                    
+            from sklearn.model_selection import train_test_split
+            from tensorflow.keras.preprocessing.image import ImageDataGenerator
+            
+            # TODO: Here we're assuming that X has a label column, this won't work in general
+            X_train_train, x_val = train_test_split(X_train, test_size=config.validation_split, shuffle=True, stratify=X_train['labels'], random_state=0)
+            
+            datagen_train = config.datagen
+            train_generator = datagen_train.flow_from_dataframe(dataframe=X_train_train, 
+                                            directory=config.dir,
+                                            x_col=config.x_col, y_col='labels',
+                                            class_mode="categorical",
+                                            classes = class_names,
+                                            target_size=config.target_size,
+                                            batch_size=config.batch_size)
+            
+            datagen_valid = config.datagen_valid
+            valid_generator = datagen_valid.flow_from_dataframe(dataframe=x_val,
+                                            directory=config.dir,
+                                            x_col=config.x_col, y_col='labels',
+                                            class_mode="categorical",
+                                            classes = class_names,
+                                            target_size=config.target_size,
+                                            batch_size=config.batch_size)
+        else:
+            from tensorflow.keras.preprocessing.image import ImageDataGenerator
+            datagen = config.datagen
+            train_generator = datagen.flow_from_dataframe(dataframe=X_train, directory=config.dir,
+                                            x_col=config.x_col, y_col='labels',
+                                            class_mode="categorical",
+                                            classes = class_names,
+                                            target_size=config.target_size,
+                                            batch_size=config.batch_size)
+            
         try:
             if isinstance(task, OpenMLSupervisedTask):
-                epoch = config.epoch
-                batch_size = config.batch_size
-                model_copy.fit(X_train, y_train, batch_size=config.batch_size,epochs=epoch)
+                print(f"Training ({len(X_train)} samples)")
+
+                
+                if config.perform_validation:
+                    model_copy.fit(train_generator,
+                    steps_per_epoch=config.step_per_epoch,
+                    validation_data = valid_generator, 
+                    validation_steps =  valid_generator.n//valid_generator.batch_size,
+                    epochs=config.epoch,
+                    **kwargs)
+                    
+                else:
+                    model_copy.fit(train_generator,
+                    steps_per_epoch=config.step_per_epoch,
+                    epochs=config.epoch,
+                    **kwargs)
+                
+                #print('model_trained')
+
         except AttributeError as e:
             # typically happens when training a regressor on classification task
             raise PyOpenMLError(str(e))
-
-        if isinstance(task, OpenMLClassificationTask):
-            model_classes = tensorflow.keras.backend.argmax(y_train, axis=-1)
-
+        
+        #class_mapping = train_generator.class_indices  
+        #print("Class mapping",class_mapping)
+        #classes_ordered = sorted(class_mapping, key=class_mapping.get)
+        #print("Classes ordered",classes_ordered)
         # In supervised learning this returns the predictions for Y
+
+        #print("X test",X_test)
+        datagen_test = ImageDataGenerator()
+        test_generator = datagen_test.flow_from_dataframe(dataframe=X_test, 
+                                             directory=config.dir,
+                                             class_mode=None,
+                                             x_col=config.x_col,
+                                             batch_size=32,
+                                             shuffle=False,
+                                             target_size=config.target_size)
+        print(f"Testing ({len(X_test)} samples)")
         if isinstance(task, OpenMLSupervisedTask):
-            pred_y = model_copy.predict(X_test)
+            pred_y = model_copy.predict(test_generator)
+            proba_y = pred_y
             if isinstance(task, OpenMLClassificationTask):
-                pred_y = tensorflow.keras.backend.argmax(pred_y)
-            elif isinstance(task, OpenMLRegressionTask):
-                pred_y = tensorflow.keras.backend.reshape(pred_y, (-1,))
-            pred_y = tensorflow.keras.backend.eval(pred_y)
+                pred_y = np.argmax(pred_y, axis=-1)
+                #print("preds", pred_y)
+            #elif isinstance(task, OpenMLRegressionTask):
+            #    pred_y = tensorflow.keras.backend.reshape(pred_y, (-1,))
+            #pred_y = tensorflow.keras.backend.eval(pred_y)  
         else:
             raise ValueError(task)
 
+        # Remap the probabilities in case there was a class missing at training time
+        # By default, the classification targets are mapped to be zero-based indices
+        # to the actual classes. Therefore, the model_classes contain the correct
+        # indices to the correct probability array. Example:
+        # classes in the dataset: 0, 1, 2, 3, 4, 5
+        # classes in the training set: 0, 1, 2, 4, 5
+        # then we need to add a column full of zeros into the probabilities for class 3
+        # (because the rest of the library expects that the probabilities are ordered
+        # the same way as the classes are ordered).
         if isinstance(task, OpenMLClassificationTask):
-
-            try:
-                proba_y = model_copy.predict(X_test)
-            except AttributeError:
-                if task.class_labels is not None:
-                    proba_y = _prediction_to_probabilities(pred_y, list(task.class_labels))
-                else:
-                    raise ValueError('The task has no class labels')
             if task.class_labels is not None:
                 if proba_y.shape[1] != len(task.class_labels):
-                    # Remap the probabilities in case there was a class missing at training time
-                    # By default, the classification targets are mapped to be zero-based indices
-                    # to the actual classes. Therefore, the model_classes contain the correct
-                    # indices to the correct probability array. Example:
-                    # classes in the dataset: 0, 1, 2, 3, 4, 5
-                    # classes in the training set: 0, 1, 2, 4, 5
-                    # then we need to add a column full of zeros into the probabilities for class 3
-                    # (because the rest of the library expects that the probabilities are ordered
-                    # the same way as the classes are ordered).
+                    model_classes = np.sort(X_train['labels'].astype('int').unique())
                     proba_y_new = np.zeros((proba_y.shape[0], len(task.class_labels)))
                     for idx, model_class in enumerate(model_classes):
                         proba_y_new[:, model_class] = proba_y[:, idx]
@@ -817,7 +917,23 @@ class TensorflowExtension(Extension):
             proba_y = None
         else:
             raise TypeError(type(task))
+        
+        # Adjust prediction labels according to train_generator
+        # pred_y = [int(classes_ordered[p_y]) for p_y in pred_y]
+        pred_y = [class_names[i] for i in pred_y]
 
+        #pred_y = le.inverse_transform(pred_y)
+        #print("pred classes", pred_y)
+
+        #pred_y = pred_y.astype('str')
+        #print("pred inverse encoded str", pred_y)
+
+        # Convert the TensorFlow model to ONNX
+        onnx_model, _ = tf2onnx.convert.from_keras(model_copy, opset=13)
+        onnx_ = onnx_model.SerializeToString()
+        global last_models
+        last_models = onnx_
+        
         return pred_y, proba_y, user_defined_measures, None
 
     def compile_additional_information(
@@ -913,7 +1029,8 @@ class TensorflowExtension(Extension):
 
                 # vanilla parameter value
                 parsed_values = json.dumps(current_param_values)
-
+                if len(current_param_values)>2000:
+                   current_param_values = current_param_values[0:1000]
                 _current['oml:value'] = parsed_values
                 if _main_call:
                     _current['oml:component'] = main_id

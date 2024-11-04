@@ -9,12 +9,14 @@ dist/
 
 openml_tensorflow/__pycache__/
 
-build/
-
-create_tasks/
+.onnx
 
 openml_tensorflow.egg-info/
 
 tests/__pycache__/
-                
+
 venv/
+
+build/
+
+create_tasks/
