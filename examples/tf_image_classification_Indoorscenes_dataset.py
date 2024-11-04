@@ -27,8 +27,6 @@ from keras import regularizers
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
-warnings.simplefilter(action='ignore', category=UserWarning)
-warnings.simplefilter(action='ignore', category=RuntimeWarning)
 
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
@@ -52,7 +50,6 @@ base_learning_rate = 0.0001
 # dataset = openml.datasets.get_dataset(45936, download_all_files=True, download_data=True)
 
 # Toy example
-datagen = ImageDataGenerator()
 openml_tensorflow.config.datagen = datagen
 openml_tensorflow.config.dir = openml.config.get_cache_directory()+'/datasets/45936/Images/'
 openml_tensorflow.config.x_col = "Filename"
@@ -68,20 +65,6 @@ kwargs = {
 }
 openml_tensorflow.config.kwargs = kwargs
 
-
-# model = models.Sequential()
-# model.add(layers.Conv2D(128, (3, 3), activation='relu', input_shape=(128, 128, 3)))
-# model.add(layers.MaxPooling2D((2, 2)))
-# model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-# model.add(layers.MaxPooling2D((2, 2)))
-# model.add(layers.Conv2D(64, (3, 3), activation='relu'))
-# model.add(layers.Flatten())
-# model.add(layers.Dense(64, activation='relu'))
-# model.add(layers.Dense(84, activation='relu'))
-# model.add(layers.Dense(67, activation='softmax'))  # Adjust output size
-# model.compile(optimizer='adam',
-#               loss='categorical_crossentropy',
-#               metrics=['accuracy'])
 
 ############################################################################
 # Large CNN
@@ -147,7 +130,7 @@ model.compile(
     metrics=['AUC'])
 ############################################################################
 
-# Download the OpenML task for the Meta_Album_PNU_Micro dataset.
+# Download the OpenML task for the Indoorscenes dataset.
 
 # task = openml.tasks.get_task(362065)
 task = openml.tasks.get_task(362070)
@@ -181,4 +164,3 @@ import netron
 # Visualize the ONNX model using Netron
 netron.start(file_path)
 
-# URL for run: https://www.openml.org/api/v1/xml/run/10594206
