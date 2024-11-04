@@ -8,3 +8,13 @@ openml_keras.egg-info/
 dist/
 
 openml_tensorflow/__pycache__/
+
+build/
+
+create_tasks/
+
+openml_tensorflow.egg-info/
+
+tests/__pycache__/
+                
+venv/
