@@ -56,7 +56,7 @@ Additionally, if you want to publish the run with onnx file, then you must call 
 run = openml_tensorflow.add_onnx_to_run(run)
 ```
 
-##### Using docker image
+#### Using docker image
 
 The docker container has the latest version of [OpenML-Tensorflow](https://github.com/openml/openml-tensorflow) downloaded and pre-installed. It can be used to run TensorFlow Deep Learning analysis on OpenML datasets. 
 See [docker](docker/README.md).
