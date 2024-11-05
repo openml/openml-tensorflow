@@ -1,0 +1,58 @@
+site_name: OpenML Tensorflow Extension
+theme:
+  name: material
+  features:
+    - content.code.copy
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      primary: indigo
+      accent: indigo
+      scheme: slate
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      linenums: true
+  - pymdownx.inlinehilite
+  - toc:
+      permalink: true
+plugins:
+  - search
+  - mkdocs-jupyter
+  - awesome-pages
+  # - mknotebooks:
+      # execute: false
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths: [openml_tensorflow]
+          load_external_modules: true
+          show_source: true
+          options:
+            docstring_section_style: table
+            show_docstring_functions: true
+
+nav:
+  - Home: "index.md"
+  - API Reference:
+  - Examples:
+  - "Limitations of the API":  "Limitations of the API.md"
+ 
