@@ -1,8 +1,8 @@
 """
-Tensorflow image classification model example
+Tensorflow big image dataset classification model example
 ==================
 
-An example of a tensorflow network that classifies meta album images.
+An example of a tensorflow network that classifies IndoorScenes images into `67` classes using tensorflow `Sequential` model.
 """
 
 

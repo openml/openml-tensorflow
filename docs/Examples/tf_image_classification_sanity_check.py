@@ -1,22 +1,22 @@
 """
-Tensorflow image classification model example
+Performance check of tensorflow image classification model
 ==================
 
-An example of a tensorflow network that classifies meta album images.
+This example demonstrates how to build and train a TensorFlow network that classifies images from the Meta Album Images dataset on OpenML.
+The model runs independently and can be used as a sanity check to compare results generated using ` openml.runs.run_model_on_task`.
 """
-
-import tensorflow
 
 import openml
 import openml_tensorflow
 
 import os
 import pandas as pd
-from sklearn import preprocessing
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import tensorflow as tf
 from tensorflow.keras import datasets, layers, models
 import logging
+
+from sklearn.model_selection import train_test_split
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning)
@@ -74,7 +74,7 @@ model.compile(optimizer='adam',
 
 # task = openml.tasks.get_task(362071)
 
-from sklearn.model_selection import train_test_split
+
 
 openml_dataset = openml.datasets.get_dataset(45923, download_all_files=True)
 df, *_ = openml_dataset.get_data()
