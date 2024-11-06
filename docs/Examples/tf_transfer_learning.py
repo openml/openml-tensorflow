@@ -2,7 +2,9 @@
 Tensorflow image classification using pre-trained model example
 ==================
 
-An example of a tensorflow network that classifies indoor scenes images.
+An example of a tensorflow pre-trained network that classifies indoor scenes images, where all layers are trained. 
+For smaller datasets or datasets similar to the dataset the base model was trained on, 
+it is advisable to freeze pre-trained network, and only train custom layers. 
 """
 
 import openml
