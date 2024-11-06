@@ -52,8 +52,11 @@ plugins:
 
 nav:
   - Home: "index.md"
-  # - API Reference: 
-  - Docker Reference: "docker.md"
+  - API Reference: 
+    - "Config": "API reference/Config.md"
+    - "OpenML Integration": "API reference/OpenML integration.md"
+  - Docker Reference: 
+    - "Docker": "Docker reference/Docker.md"
   # - Examples:
   # - "Limitations of the API":  "Limitations of the API.md"
  
