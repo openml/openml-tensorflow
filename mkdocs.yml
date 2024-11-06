@@ -59,8 +59,8 @@ nav:
     - "Docker": "Docker reference/Docker.md"
   - Examples:
     - "Image Classification Task": "Examples/tf_image_classification.py"
-    - "Performance Check Image Classification Task": "Example/tf_image_classification_sanity_check.py"
-    - "Image Classification Task on Big Dataset": "Example/tf_image_classification_Indoorscenes_dataset.py"
-    - "Pretrained Image Classification Example": "Example/tf_pretrained_model_Indoorscenes_dataset.py"
+    - "Performance Check Image Classification Task": "Examples/tf_image_classification_sanity_check.py"
+    - "Image Classification Task on Big Dataset": "Examples/tf_image_classification_Indoorscenes_dataset.py"
+    - "Pretrained Image Classification Example": "Examples/tf_pretrained_model_Indoorscenes_dataset.py"
   # - "Limitations of the API":  "Limitations of the API.md"
  
