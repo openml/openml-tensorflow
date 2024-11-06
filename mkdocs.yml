@@ -57,6 +57,7 @@ nav:
     - "OpenML Integration": "API reference/OpenML integration.md"
   - Docker Reference: 
     - "Docker": "Docker reference/Docker.md"
-  # - Examples:
+  - Examples:
+    - "Image Classification Task": "Examples/tf_image_classification.py"
   # - "Limitations of the API":  "Limitations of the API.md"
  
