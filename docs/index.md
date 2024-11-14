@@ -47,7 +47,7 @@ print('URL for run: %s/run/%d' % (openml.config.server, run.run_id))
 
 ```
 
-Note: The input layer of the network should be compatible with OpenML data output shape. Please check [examples](/docs/Examples/) for more information.
+Note: The input layer of the network should be compatible with OpenML data output shape. Please check [examples](./Examples/index.md) for more information.
 
 
 Additionally, if you want to publish the run with onnx file, then you must call ```openml_tensorflow.add_onnx_to_run()``` immediately before ```run.publish()```. 
