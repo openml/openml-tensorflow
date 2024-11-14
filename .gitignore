@@ -9,7 +9,7 @@ dist/
 
 openml_tensorflow/__pycache__/
 
-.onnx
+*.onnx
 
 openml_tensorflow.egg-info/
 
