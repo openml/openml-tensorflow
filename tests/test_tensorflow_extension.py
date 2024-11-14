@@ -14,7 +14,7 @@ import unittest
 this_directory = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(this_directory)
 
-__version__ = 0.1
+__version__ = 1.0
 
 
 class TestTfExtensionFlowFunctions(unittest.TestCase):
