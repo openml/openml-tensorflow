@@ -430,8 +430,8 @@ class TensorflowExtension(Extension):
             # Recover loss functions and metrics
             loss = training_config['loss']
             metrics = training_config['metrics']
-            sample_weight_mode = training_config['sample_weight_mode']
-            loss_weights = training_config['loss_weights']
+            sample_weight_mode = training_config.get('sample_weight_mode', None)
+            loss_weights = training_config.get('loss_weights', None)
 
             # Compile model
             model.compile(optimizer=optimizer,

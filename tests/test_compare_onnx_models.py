@@ -1,5 +1,16 @@
+"""
+Below pytest test compares two onnx models for identical structure and parameters.  
+"""
 import onnx
 import numpy as np
+import os
+import pytest
+
+# Paths to ONNX models
+MODEL_PATH1 = "model1.onnx"
+MODEL_PATH2 = "model2.onnx"
+
+# Helper function to compare graph structures
 def compare_graphs(graph1, graph2):
     nodes1 = graph1.node
     nodes2 = graph2.node
@@ -17,12 +28,12 @@ def compare_graphs(graph1, graph2):
     print("Graph structures are identical.")
     return True
 
-def compare_models(model_path1, model_path2):
+# Helper function to compare model parameters
+def compare_parameters(model_path1, model_path2):
     # Load ONNX models
     model1 = onnx.load(model_path1)
     model2 = onnx.load(model_path2)
     
-    # Compare graph structures
     # Compare graph structures
     if not compare_graphs(model1.graph, model2.graph):
         return False
@@ -40,9 +51,19 @@ def compare_models(model_path1, model_path2):
     print("Models are identical.")
     return True
 
-# Paths to ONNX models
-model_path1 = "model1.onnx"
-model_path2 = "model2.onnx"
 
-# Compare models
-compare_models(model_path1, model_path2)
+@pytest.mark.skipif(
+    not (os.path.exists("model1.onnx") and os.path.exists("model2.onnx")),
+    reason="ONNX models are not available"
+)
+def test_compare_onnx_models():
+    # Load ONNX models
+    model1 = onnx.load(MODEL_PATH1)
+    model2 = onnx.load(MODEL_PATH2)
+
+    # Perform comparisons
+    assert compare_graphs(model1.graph, model2.graph), "Graph structures are different."
+    assert compare_parameters(model1, model2), "Model parameters are different."
+
+    print("ONNX models are identical.")
+

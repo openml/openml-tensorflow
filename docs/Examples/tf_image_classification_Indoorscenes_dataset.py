@@ -41,15 +41,23 @@ openml.config.apikey = 'KEY'
 
 ############################################################################
 
-openml_tensorflow.config.epoch = 10 #  small epoch for test runs
+openml_tensorflow.config.epoch = 1 #  small epoch for test runs
 
 IMG_SIZE = (128, 128)
 IMG_SHAPE = IMG_SIZE + (3,)
 base_learning_rate = 0.0001
 
-# dataset = openml.datasets.get_dataset(45936, download_all_files=True, download_data=True)
-
 # Toy example
+datagen = ImageDataGenerator(
+    rotation_range=25,
+    width_shift_range=0.01,
+    height_shift_range=0.01,
+    brightness_range=(0.9, 1.1),
+    zoom_range=0.1,
+    horizontal_flip=True,
+    vertical_flip=True,
+)
+
 openml_tensorflow.config.datagen = datagen
 openml_tensorflow.config.dir = openml.config.get_cache_directory()+'/datasets/45936/Images/'
 openml_tensorflow.config.x_col = "Filename"
@@ -68,16 +76,6 @@ openml_tensorflow.config.kwargs = kwargs
 
 ############################################################################
 # Large CNN
-
-datagen = ImageDataGenerator(
-    rotation_range=25,
-    width_shift_range=0.01,
-    height_shift_range=0.01,
-    brightness_range=(0.9, 1.1),
-    zoom_range=0.1,
-    horizontal_flip=True,
-    vertical_flip=True,
-)
 
 IMG_SIZE = 128
 NUM_CLASSES = 67
@@ -144,7 +142,7 @@ run = openml.runs.run_model_on_task(model, task, avoid_duplicate_runs=False)
 # Careful to not call this function when another run_model_on_task is called in between, 
 # as during publish later, only the last trained model (from last run_model_on_task call) is uploaded.   
 run = openml_tensorflow.add_onnx_to_run(run)
-# breakpoint()
+
 run.publish()
 
 print('URL for run: %s/run/%d?api_key=%s' % (openml.config.server, run.run_id, openml.config.apikey))
