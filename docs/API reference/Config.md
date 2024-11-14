@@ -18,3 +18,4 @@ validation_split = 0.1  # The percentage of data set aside for the validation se
 validation_steps = 1
 datagen_valid = ImageDataGenerator()
 kwargs = {}
+```
