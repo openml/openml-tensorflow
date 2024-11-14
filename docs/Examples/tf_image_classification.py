@@ -1,8 +1,8 @@
 """
-Tensorflow image classification model example
+Tensorflow image classification model example I
 ==================
 
-An example of a tensorflow network that classifies meta album images.
+An example of a Tensorflow network that classifies Meta Album images.
 """
 
 import openml

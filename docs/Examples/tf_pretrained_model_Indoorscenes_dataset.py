@@ -1,8 +1,9 @@
 """
-Tensorflow image classification model example
+Tensorflow image classification using pre-trained model example II
 ==================
 
-An example of a tensorflow network that classifies indoor scenes images using pre-trained transformer model.
+An example of a tensorflow network that classifies Indoor Scenes images using pre-trained transformer model.
+Here some layers of the pre-trained model are trained while other layers are frozen. 
 """
 
 

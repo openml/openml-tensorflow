@@ -63,5 +63,5 @@ nav:
     - "Image Classification Task on Big Dataset": "Examples/tf_image_classification_Indoorscenes_dataset.py"
     - "Pretrained Image Classification Example": "Examples/tf_pretrained_model_Indoorscenes_dataset.py"
     - "Pretrained Image Classification on Big Dataset": "Examples/tf_transfer_learning.py"
-  # - "Limitations of the API":  "Limitations of the API.md"
+  - "Limitations of the API":  "Limitations of the API.md"
  

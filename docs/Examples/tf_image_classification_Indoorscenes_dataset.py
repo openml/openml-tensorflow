@@ -1,5 +1,5 @@
 """
-Tensorflow big image dataset classification model example
+Tensorflow image dataset classification model example II
 ==================
 
 An example of a tensorflow network that classifies IndoorScenes images into `67` classes using tensorflow `Sequential` model.

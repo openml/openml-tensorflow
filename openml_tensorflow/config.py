@@ -1,4 +1,7 @@
-# Config file to define all hyperparameters
+"""
+Config file to define all hyperparameters. 
+"""
+
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 epoch = 10

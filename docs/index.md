@@ -50,7 +50,7 @@ print('URL for run: %s/run/%d' % (openml.config.server, run.run_id))
 Note: The input layer of the network should be compatible with OpenML data output shape. Please check [examples](/docs/Examples/) for more information.
 
 
-Additionally, if you want to publish the run with onnx file, then you must call ```openml_pytorch.add_onnx_to_run()``` immediately before ```run.publish()```. 
+Additionally, if you want to publish the run with onnx file, then you must call ```openml_tensorflow.add_onnx_to_run()``` immediately before ```run.publish()```. 
 
 ```python
 run = openml_tensorflow.add_onnx_to_run(run)
@@ -59,7 +59,7 @@ run = openml_tensorflow.add_onnx_to_run(run)
 #### Using docker image
 
 The docker container has the latest version of [OpenML-Tensorflow](https://github.com/openml/openml-tensorflow) downloaded and pre-installed. It can be used to run TensorFlow Deep Learning analysis on OpenML datasets. 
-See [docker](docker/README.md).
+See [docker](/docs/Docker%20reference/Docker.md).
 
 
-This library is currently under development, please report any bugs or feature reuest in issues section.
+This library is currently under development, please report any bugs or feature request in issues section.
