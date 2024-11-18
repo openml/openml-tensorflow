@@ -27,9 +27,9 @@ docker run -t -i -v PATH/TO/CODE_FOLDER:/app -v PATH/TO/DATASET_FOLDER:/app/data
 ```text
 openml_tensorflow.config.dir = 'dataset/Images'
 ```
-4. Run your code scripts using:
+4. Run your code scripts using, for example:
 ```text
- python my_code.py
+ python docs/Examples/tf_image_classification.py
 ```
 
 ## Using Locally Stored Datasets [Optional]
