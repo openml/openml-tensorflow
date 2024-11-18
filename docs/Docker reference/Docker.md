@@ -1,2 +1,1 @@
-
-```{include} ../../docker/README.md
+--8<-- "../docker/README.md"
