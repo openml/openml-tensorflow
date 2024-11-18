@@ -56,7 +56,7 @@ nav:
     - "Config": "API reference/Config.md"
     - "OpenML Integration": "API reference/OpenML integration.md"
   - Docker Reference: 
-    - "Docker": "Docker reference/Docker.md"
+    - "Docker": !include "docker/README.md"
   - Examples:
     - "Image Classification Task": "Examples/tf_image_classification.py"
     - "Performance Check Image Classification Task": "Examples/tf_image_classification_sanity_check.py"
