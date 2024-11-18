@@ -32,7 +32,7 @@ openml_tensorflow.config.dir = 'dataset/Images'
  python docs/Examples/tf_image_classification.py
 ```
 
-## Using Locally Stored Datasets [Optional]
+## Using Locally Stored Datasets 
 
 If you don't want to download the dataset each time you run your script, you can mount your dataset saved in your local cache directory to the container. 
 
