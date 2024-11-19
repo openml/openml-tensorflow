@@ -3,11 +3,11 @@
 The docker container has the latest version of OpenML-Tensorflow downloaded and pre-installed. It can be used to run TensorFlow Deep Learning analysis on OpenML datasets. 
 This document contains information about:
 
-[Usage](#usage): how to use the image\
+[Usage](#usage): how to use the image
 
-[Using Locally Stored Datasets](#using-locally-stored-datasets-optional): mounting datasets from the local cache\
+[Using Locally Stored Datasets](#using-locally-stored-datasets): mounting datasets from the local cache
 
-[Environment Variables](#environment-variable): setting the cache directory path\
+[Environment Variables](#environment-variable): setting the cache directory path
 
 ## Usage
 
