@@ -4,7 +4,9 @@ The docker container has the latest version of OpenML-Tensorflow downloaded and 
 This document contains information about:
 
 [Usage](#usage): how to use the image\
+
 [Using Locally Stored Datasets](#using-locally-stored-datasets-optional): mounting datasets from the local cache\
+
 [Environment Variables](#environment-variable): setting the cache directory path\
 
 ## Usage
@@ -103,7 +105,8 @@ docker run -t -i -v PATH/TO/CODE_FOLDER:/app -v PATH/TO/DATASET_FOLDER:/app/data
 ```
 
 2. Set correct path to the dataset.  
-```text
+
+```
 openml_tensorflow.config.dir = '/app/dataset/Images'
 ``` 
 
