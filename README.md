@@ -59,7 +59,7 @@ run = openml_tensorflow.add_onnx_to_run(run)
 #### Using docker image
 
 The docker container has the latest version of [OpenML-Tensorflow](https://github.com/openml/openml-tensorflow) downloaded and pre-installed. It can be used to run TensorFlow Deep Learning analysis on OpenML datasets. 
-See [docker](docker/README.md).
+See [docker](docs/Docker%20reference/Docker.md).
 
 
 This library is currently under development, please report any bugs or feature reuest in issues section.
