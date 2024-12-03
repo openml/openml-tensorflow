@@ -35,15 +35,15 @@ jobs:
       run: |
         docker push openml/openml-tensorflow:latest
 
-    - name: Update Docker Hub Overview
-      run: |
-        # Extract the content of Docker.md
-        DESCRIPTION=$(cat docs/Docker\ reference/Docker.md)
+    # - name: Update Docker Hub Overview
+    #   run: |
+    #     # Extract the content of Docker.md
+    #     DESCRIPTION=$(cat docs/Docker\ reference/Docker.md)
 
-        # Authenticate with Docker Hub and update description
-        curl -X PATCH https://hub.docker.com/v2/repositories/openml/openml-tensorflow/ \
-        -H "Authorization: Bearer ${{ secrets.ORG_DOCKERHUB_TOKEN }}" \
-        -H "Content-Type: application/json" \
-        -d "{\"full_description\": \"$DESCRIPTION\"}"
+    #     # Authenticate with Docker Hub and update description
+    #     curl -X PATCH https://hub.docker.com/v2/repositories/openml/openml-tensorflow/ \
+    #     -H "Authorization: Bearer ${{ secrets.ORG_DOCKERHUB_TOKEN }}" \
+    #     -H "Content-Type: application/json" \
+    #     -d "{\"full_description\": \"$DESCRIPTION\"}"
 
     
