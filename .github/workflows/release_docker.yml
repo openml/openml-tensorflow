@@ -1,0 +1,28 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - master  # Trigger on pushes to the master branch
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.ORG_DOCKERHUB_USERNAME }}
+        password: ${{ secrets.ORG_DOCKERHUB_TOKEN }}
+
+    - name: Build Docker Image
+      run: |
+        docker build -t openml/openml-tensorflow:latest -f docker/Dockerfile .
+
+    - name: Push Docker Image
+      run: |
+        docker push openml/openml-tensorflow:latest
