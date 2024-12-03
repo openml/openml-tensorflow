@@ -15,15 +15,15 @@ These are the steps to use the image:
 
 1. Pull the docker image 
 ```
-docker pull taniyadas/openml-tensorflow:latest
+docker pull openml/openml-tensorflow:latest
 ```
 2. If you want to run a local script, it needs to be mounted first. Mount it into the 'app' folder:
 ```text
-docker run -it -v PATH/TO/CODE_FOLDER:/app taniyadas/openml-tensorflow /bin/bash
+docker run -it -v PATH/TO/CODE_FOLDER:/app openml/openml-tensorflow /bin/bash
 ```
 You can also mount multiple directories into the container (such as your code file directory and dataset directory ) using:
 ```text
-docker run -t -i -v PATH/TO/CODE_FOLDER:/app -v PATH/TO/DATASET_FOLDER:/app/dataset taniyadas/openml-tensorflow /bin/bash
+docker run -t -i -v PATH/TO/CODE_FOLDER:/app -v PATH/TO/DATASET_FOLDER:/app/dataset openml/openml-tensorflow /bin/bash
 ```
 3. Please make sure to give the correct path to the dataset. For example, 
 ```text
@@ -43,7 +43,7 @@ If you don't want to download the dataset each time you run your script, you can
 1. Mount the dataset to the 'app/dataset' folder
 
 ```
-docker run -t -i -v PATH/TO/CODE_FOLDER:/app -v PATH/TO/DATASET_FOLDER:/app/dataset taniyadas/openml-tensorflow /bin/bash
+docker run -t -i -v PATH/TO/CODE_FOLDER:/app -v PATH/TO/DATASET_FOLDER:/app/dataset openml/openml-tensorflow /bin/bash
 ```
 
 2. Set correct path to the dataset.  
