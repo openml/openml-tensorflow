@@ -2,8 +2,14 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches:
-      - master  # Trigger on pushes to the master branch
+    # Trigger only when changes are made in these specific files or directories
+    paths:
+        - "setup.py"
+        - "README.md"
+        - "openml_tensorflow/**"
+        - "docs/Examples/**"
+        - "docker/Dockerfile"
+        - "docs/Docker reference/Docker.md"
 
 jobs:
   build-and-push:
@@ -26,3 +32,18 @@ jobs:
     - name: Push Docker Image
       run: |
         docker push openml/openml-tensorflow:latest
+
+    - name: Update Docker Hub Overview
+      run: |
+        # Extract the content of Docker.md
+        DESCRIPTION=$(cat docs/Docker\ reference/Docker.md)
+
+        # Authenticate with Docker Hub and update description
+        curl -X PATCH https://hub.docker.com/v2/repositories/openml/openml-tensorflow/ \
+        -H "Authorization: JWT $(curl -s -X POST https://hub.docker.com/v2/users/login/ \
+            -H 'Content-Type: application/json' \
+            -d '{"username": "'"${DOCKER_USERNAME}"'", "password": "'"${DOCKER_TOKEN}"'"}' | jq -r .token)" \
+        -H "Content-Type: application/json" \
+        -d "{\"full_description\": \"$DESCRIPTION\"}"
+
+    
