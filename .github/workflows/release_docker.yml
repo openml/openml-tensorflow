@@ -42,9 +42,7 @@ jobs:
 
         # Authenticate with Docker Hub and update description
         curl -X PATCH https://hub.docker.com/v2/repositories/openml/openml-tensorflow/ \
-        -H "Authorization: JWT $(curl -s -X POST https://hub.docker.com/v2/users/login/ \
-            -H 'Content-Type: application/json' \
-            -d '{"username": "'"${DOCKER_USERNAME}"'", "password": "'"${DOCKER_TOKEN}"'"}' | jq -r .token)" \
+        -H "Authorization: Bearer ${{ secrets.ORG_DOCKERHUB_TOKEN }}" \
         -H "Content-Type: application/json" \
         -d "{\"full_description\": \"$DESCRIPTION\"}"
 
