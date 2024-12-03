@@ -11,6 +11,8 @@ on:
         - "docker/Dockerfile"
         - "docs/Docker reference/Docker.md"
 
+  workflow_dispatch:  # allows manual trigger to the workflow
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
